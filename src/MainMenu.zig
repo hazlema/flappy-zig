@@ -11,23 +11,27 @@ selected_difficulty: Difficulty.Level,
 screen_width: i32,
 screen_height: i32,
 keyboard_selection_index: usize, // Track which button is highlighted by keyboard
+font: rl.Font,
 
 pub fn init(background: *Background, screen_width: i32, screen_height: i32) !MainMenu {
+    const font = try rl.loadFontEx("assets/fonts/Kenney-Future.ttf", 96, null);
+
     return MainMenu{
         .background = background,
         .selected_difficulty = .medium, // Default to medium
         .screen_width = screen_width,
         .screen_height = screen_height,
-        .keyboard_selection_index = 1, // Start on medium (index: 0=easy, 1=medium, 2=hard)
+        .keyboard_selection_index = 0, // Start on medium (index: 0=easy, 1=medium, 2=hard)
+        .font = font,
     };
 }
 
-pub fn deinit(_: *MainMenu) void {
-    // Nothing to clean up for now
+pub fn deinit(self: *MainMenu) void {
+    rl.unloadFont(self.font);
 }
 
 /// Draws a button and returns true if clicked
-fn drawButton(x: i32, y: i32, width: i32, height: i32, text: [:0]const u8, is_selected: bool) bool {
+fn drawButton(self: *const MainMenu, x: i32, y: i32, width: i32, height: i32, text: [:0]const u8, is_selected: bool) bool {
     const mouse_pos = rl.getMousePosition();
     const mouse_over = rl.checkCollisionPointRec(
         mouse_pos,
@@ -47,10 +51,12 @@ fn drawButton(x: i32, y: i32, width: i32, height: i32, text: [:0]const u8, is_se
     rl.drawRectangleLines(x, y, width, height, rl.Color.black);
 
     // Draw text centered in button
-    const text_width = rl.measureText(text, 30);
-    const text_x = x + @divTrunc(width - text_width, 2);
-    const text_y = y + @divTrunc(height - 30, 2);
-    rl.drawText(text, text_x, text_y, 30, rl.Color.black);
+    const font_size = 30;
+    const text_size = rl.measureTextEx(self.font, text, font_size, 1);
+    const text_x: f32 = @as(f32, @floatFromInt(x)) + @as(f32, @floatFromInt(width)) / 2.0 - text_size.x / 2.0;
+    const text_y: f32 = @as(f32, @floatFromInt(y)) + @as(f32, @floatFromInt(height)) / 2.0 - text_size.y / 2.0;
+
+    rl.drawTextEx(self.font, text, rl.Vector2.init(text_x, text_y), font_size, 1, rl.Color.black);
 
     // Return true if button was clicked
     return mouse_over and rl.isMouseButtonPressed(rl.MouseButton.left);
@@ -107,15 +113,15 @@ pub fn run(self: *MainMenu) ?Difficulty.Level {
         rl.drawText(subtitle, subtitle_x, 200, 30, rl.Color.light_gray);
 
         // Draw difficulty buttons (with keyboard selection highlighting)
-        if (drawButton(button_x, start_y, button_width, button_height, "EASY", self.keyboard_selection_index == 0)) {
+        if (self.drawButton(button_x, start_y, button_width, button_height, "EASY", self.keyboard_selection_index == 0)) {
             return .easy;
         }
 
-        if (drawButton(button_x, start_y + spacing, button_width, button_height, "MEDIUM", self.keyboard_selection_index == 1)) {
+        if (self.drawButton(button_x, start_y + spacing, button_width, button_height, "MEDIUM", self.keyboard_selection_index == 1)) {
             return .medium;
         }
 
-        if (drawButton(button_x, start_y + spacing * 2, button_width, button_height, "HARD", self.keyboard_selection_index == 2)) {
+        if (self.drawButton(button_x, start_y + spacing * 2, button_width, button_height, "HARD", self.keyboard_selection_index == 2)) {
             return .hard;
         }
 
