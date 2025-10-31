@@ -1,5 +1,6 @@
 const std = @import("std");
 const rl = @import("raylib");
+const Difficulty = @import("Difficulty.zig");
 
 pub const Obstacle = struct {
     x: f32,
@@ -18,13 +19,13 @@ start: f32,
 pipe_width: f32,
 texture: rl.Texture2D,
 
-pub fn init(allocator: std.mem.Allocator) !Obstacles {
+pub fn init(allocator: std.mem.Allocator, difficulty: Difficulty.Level) !Obstacles {
     const texture = try rl.loadTexture("assets/sprites/pipe.png");
 
     return Obstacles{
         .allocator = allocator,
         .obstacles = std.ArrayList(Obstacle){},
-        .gap = 140,
+        .gap = difficulty.getObstacleGap(),
         .start = 600,
         .pipe_width = 90,
         .texture = texture,
@@ -32,7 +33,7 @@ pub fn init(allocator: std.mem.Allocator) !Obstacles {
 }
 
 pub fn createObstacle(self: *Obstacles) !void {
-    const pos_y: f32 = @floatFromInt(rl.getRandomValue(100, 500));
+    const pos_y: f32 = @floatFromInt(rl.getRandomValue(100, 400));
     const pos_x: f32 = self.start + (@as(f32, @floatFromInt(self.texture.width)) * @as(f32, @floatFromInt(self.obstacles.items.len)) * 4);
 
     try self.obstacles.append(self.allocator, Obstacle{

@@ -9,6 +9,8 @@ pub fn main() !void {
     var game = try Game.init(allocator);
     defer game.deinit();
 
+    //std.debug.print("Break Test\n", .{});
+
     while (game.isRunning()) {
         try game.update();
     }

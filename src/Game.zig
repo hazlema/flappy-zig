@@ -39,17 +39,18 @@ pub fn init(allocator: std.mem.Allocator) !Game {
     rl.setTargetFPS(60);
 
     const initial_speed: f32 = 3.0;
+    const default_difficulty = Difficulty.Level.medium;
 
     return Game{
         .allocator = allocator,
         .run = true,
         .state = .menu, // Start in menu state!
-        .current_difficulty = .medium, // Default difficulty
+        .current_difficulty = default_difficulty,
         .screen_width = screen_width,
         .screen_height = screen_height,
-        .bird = try Bird.init(.medium), // Pass default difficulty
+        .bird = try Bird.init(default_difficulty),
         .background = try Background.init(),
-        .obstacles = try Obstacles.init(allocator),
+        .obstacles = try Obstacles.init(allocator, default_difficulty),
         .score = try Score.init(),
         .initial_speed = initial_speed,
         .speed = initial_speed,
@@ -59,7 +60,6 @@ pub fn init(allocator: std.mem.Allocator) !Game {
 /// Start a new game with the given difficulty
 fn startNewGame(self: *Game, difficulty: Difficulty.Level) void {
     // Clear old game state
-    self.obstacles.clear();
     self.score.restart();
     self.speed = self.initial_speed;
     self.background.pickNewBackground();
@@ -67,6 +67,10 @@ fn startNewGame(self: *Game, difficulty: Difficulty.Level) void {
     // Recreate bird with new difficulty settings
     self.bird.deinit(); // Clean up old bird
     self.bird = Bird.init(difficulty) catch unreachable; // Create new bird
+
+    // Recreate obstacles with new difficulty settings
+    self.obstacles.deinit(); // Clean up old obstacles
+    self.obstacles = Obstacles.init(self.allocator, difficulty) catch unreachable; // Create new obstacles
 
     // Transition to playing state
     self.state = .playing;

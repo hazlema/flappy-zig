@@ -1,0 +1,38 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "zig build",
+			"type": "shell",
+			"command": "zig",
+			"args": [
+				"build",
+				"-Doptimize=Debug"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "zig build run",
+			"type": "shell",
+			"command": "zig",
+			"args": [
+				"build",
+				"run"
+			],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		}
+	]
+}

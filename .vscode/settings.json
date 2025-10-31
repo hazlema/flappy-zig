@@ -1,0 +1,7 @@
+{
+    "zig.path": "/opt/zig/zig",
+    "zig.zls.path": "/home/frosty/.local/bin/zls",
+    "zig.zls.enabled": true,
+    "zig.initialSetupDone": true,
+    "zig.checkForUpdate": false
+}
